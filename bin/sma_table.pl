@@ -68,8 +68,8 @@ my $val = 0;
 my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 $yearOffset += 1900;
 
-my $power = <>;
 my $tot   = <>;
+my $power = <>;
 my $mode  = 0;
 if ($power >= 0) {
     $mode = 60;
