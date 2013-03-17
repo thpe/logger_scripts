@@ -32,7 +32,11 @@ if ($lines =~ m/Current Value of 'E-Total' is '(.*)'/) {
     } else {
         print $file_line;
     }
+} else {
+    print $file_line;
 }
 if ($lines =~ m/Current Value of 'Pac' is '(.*)'/) {
     print "$1\n";
+} else {
+    print <>;
 }
