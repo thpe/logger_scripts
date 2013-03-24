@@ -20,6 +20,7 @@
 use strict;
 use warnings;
 
+use Fcntl qw( :flock );
 
 my @hardware_type_ids = ( 
     "", 
@@ -68,12 +69,21 @@ my $val = 0;
 my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 $yearOffset += 1900;
 
-my $tot   = <>;
-my $power = <>;
-my $ytot  = <>;
+open(FH, "< $ARGV[0]")                 or die "Opening: $!";
+flock(FH, LOCK_SH)                      or die "Locking: $!";
+my $tot   = <FH>;
+my $power = <FH>;
+close(FH);
+open(FH, "< $ARGV[1]")                 or die "Opening: $!";
+flock(FH, LOCK_SH)                      or die "Locking: $!";
+my $ytot  = <FH>;
+close(FH);
 my $mode  = 0;
 if ($power >= 0) {
     $mode = 60;
+}
+if ($power < 0) {
+    $power = 0;
 }
 my $etoday = $tot - $ytot;
 

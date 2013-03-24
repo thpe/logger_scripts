@@ -1,4 +1,4 @@
-#!/usr/bin/perl -i
+#!/usr/bin/perl
 # Copyright 2012 Thomas Petig
 #
 # This file is part of rklogger.
@@ -20,19 +20,36 @@
 use strict;
 use warnings;
 
+use Fcntl qw( :flock );
+use Scalar::Util qw(looks_like_number);
+
 my $slogger = "slogger";
-
-
 my $lines = `$slogger`;
 
-my $file_line = <>;
+
+my $tot;
+my $pow;
+
+
 if ($lines =~ m/Current Value of 'E-Total' is '(.*)'/) {
-    if ($1 > 0) {
-        print "$1\n";
-    } else {
-        print $file_line;
-    }
+    $tot = $pow;
 }
 if ($lines =~ m/Current Value of 'Pac' is '(.*)'/) {
-    print "$1\n";
+    $pow = $1;
 }
+
+open(FH, "+< $ARGV[0]")                 or die "Opening: $!";
+flock(FH, LOCK_EX)                      or die "Locking: $!";
+my @ARRAY = <FH>;
+
+if (looks_like_number($tot) and $tot > $ARRAY[0]) {
+    $ARRAY[0] = $tot;
+}
+if (looks_like_number($pow)) {
+    $ARRAY[1] = $pow;
+}
+# change ARRAY here
+seek(FH,0,0)                        or die "Seeking: $!";
+print FH @ARRAY                     or die "Printing: $!";
+truncate(FH,tell(FH))               or die "Truncating: $!";
+close(FH)                           or die "Closing: $!";
