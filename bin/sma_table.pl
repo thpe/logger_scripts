@@ -70,16 +70,17 @@ $yearOffset += 1900;
 
 my $tot   = <>;
 my $power = <>;
+my $ytot  = <>;
 my $mode  = 0;
 if ($power >= 0) {
     $mode = 60;
 }
-
+my $etoday = $tot - $ytot;
 
 printf "<TR><TH align=\"right\"> %d/%02d/%02d %d:%02d</TH>", $yearOffset, $month, $dayOfMonth, $hour, $minute;
 print "<TH align=\"right\"> 8kW inverter</TH>";
 printf("<TH align=\"right\"> %dW</TH>", $power);
-printf("<TH align=\"right\"> N/A</TH>", $val/1000.0);
+printf("<TH align=\"right\"> %.1fkWh</TH>", $etoday);
 printf("<TH align=\"right\"> %.1fkWh</TH>", $tot);
 $val = $mode;
 my $r = ((tlx_op_mode_id($val) == 4) or (tlx_op_mode_id($val) == 1) or (tlx_op_mode_id($val) == 2)) ? 255 : 0;
