@@ -19,6 +19,7 @@
 use strict;
 use warnings;
 use Text::CSV;
+use Fcntl qw( :flock );
 use FindBin;
 use Scalar::Util qw(looks_like_number);
 
@@ -38,6 +39,7 @@ $year += 1900;
 my $filename = $ARGV[0];
 
 open FILE, ">$filename.new" or die $!;
+flock(FILE, LOCK_EX)          or die "Locking: $!";
 my $line = <>;
 $csv->parse($line);
 my @columns = $csv->fields();
@@ -50,8 +52,9 @@ if (looks_like_number($net)) {
     $res =`$rklogger $net $sub 1 2 8`;
 } else {
     open DATAFILE, $net;
+    flock(DATAFILE, LOCK_EX) or die "Locking: $!";
     $res = <DATAFILE>;
-    print "reading dat file: $res\n";
+    chomp $res;
     close DATAFILE;
 }
 
@@ -64,13 +67,10 @@ for (; $start_year <= $year; ++$start_year) {
     print FILE $line;
     $line = "\n";
 }
-print "parsing $line\n";
 $csv->parse($line);
 @columns = $csv->fields();
-print "@columns\n";
 
 if (looks_like_number($res)) {
-    print "looks $month\n";
     if (looks_like_number($columns[$month])) {
         if ($res > $columns[$month]) {
             $columns[$month] = $res;
@@ -79,14 +79,11 @@ if (looks_like_number($res)) {
         $columns[$month] = $res;
     }
 }
-$columns[0] = 4;
 my $cret = $csv->combine(@columns);
-print "@columns, comb: $cret\n";
 if (not defined $csv->string()) {
     print "undef: $csv->error_input()\n";
 }
 print FILE $csv->string();
-print $csv->string();
 
 close FILE;
 system "rm $filename";
