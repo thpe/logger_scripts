@@ -55,6 +55,7 @@ if (looks_like_number($net)) {
     flock(DATAFILE, LOCK_EX) or die "Locking: $!";
     $res = <DATAFILE>;
     chomp $res;
+    $res *= 1000;
     close DATAFILE;
 }
 
@@ -73,10 +74,10 @@ $csv->parse($line);
 if (looks_like_number($res)) {
     if (looks_like_number($columns[$month])) {
         if ($res > $columns[$month]) {
-            $columns[$month] = $res;
+            $columns[$month] = sprintf("%d",$res);
         }
     } else {
-        $columns[$month] = $res;
+        $columns[$month] = sprintf("%d",$res);
     }
 }
 my $cret = $csv->combine(@columns);
