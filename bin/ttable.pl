@@ -45,6 +45,15 @@ my @columns = $csv->fields();
 my $net = $columns[0];
 my $sub = $columns[1];
 my $start_year = $columns[2];
+my $res;
+if (looks_like_number($net)) {
+    $res =`$rklogger $net $sub 1 2 8`;
+} else {
+    open DATAFILE, $net;
+    $res = <DATAFILE>;
+    print "reading dat file: $res\n";
+    close DATAFILE;
+}
 
 while (<>) {
     print FILE $line;
@@ -55,10 +64,13 @@ for (; $start_year <= $year; ++$start_year) {
     print FILE $line;
     $line = "\n";
 }
+print "parsing $line\n";
 $csv->parse($line);
 @columns = $csv->fields();
-my $res =`$rklogger $net $sub 1 2 8`;
+print "@columns\n";
+
 if (looks_like_number($res)) {
+    print "looks $month\n";
     if (looks_like_number($columns[$month])) {
         if ($res > $columns[$month]) {
             $columns[$month] = $res;
@@ -67,8 +79,14 @@ if (looks_like_number($res)) {
         $columns[$month] = $res;
     }
 }
-$csv->combine(@columns);
+$columns[0] = 4;
+my $cret = $csv->combine(@columns);
+print "@columns, comb: $cret\n";
+if (not defined $csv->string()) {
+    print "undef: $csv->error_input()\n";
+}
 print FILE $csv->string();
+print $csv->string();
 
 close FILE;
 system "rm $filename";
