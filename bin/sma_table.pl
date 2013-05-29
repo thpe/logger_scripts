@@ -20,6 +20,7 @@
 use strict;
 use warnings;
 
+use Fcntl qw( :flock );
 
 my @hardware_type_ids = ( 
     "", 
@@ -68,18 +69,28 @@ my $val = 0;
 my ($second, $minute, $hour, $dayOfMonth, $month, $yearOffset, $dayOfWeek, $dayOfYear, $daylightSavings) = localtime();
 $yearOffset += 1900;
 
-my $tot   = <>;
-my $power = <>;
+open(FH, "< $ARGV[0]")                 or die "Opening: $!";
+flock(FH, LOCK_SH)                      or die "Locking: $!";
+my $tot   = <FH>;
+my $power = <FH>;
+close(FH);
+open(FH, "< $ARGV[1]")                 or die "Opening: $!";
+flock(FH, LOCK_SH)                      or die "Locking: $!";
+my $ytot  = <FH>;
+close(FH);
 my $mode  = 0;
 if ($power >= 0) {
     $mode = 60;
 }
-
+if ($power < 0) {
+    $power = 0;
+}
+my $etoday = $tot - $ytot;
 
 printf "<TR><TH align=\"right\"> %d/%02d/%02d %d:%02d</TH>", $yearOffset, $month, $dayOfMonth, $hour, $minute;
 print "<TH align=\"right\"> 8kW inverter</TH>";
 printf("<TH align=\"right\"> %dW</TH>", $power);
-printf("<TH align=\"right\"> N/A</TH>", $val/1000.0);
+printf("<TH align=\"right\"> %.1fkWh</TH>", $etoday);
 printf("<TH align=\"right\"> %.1fkWh</TH>", $tot);
 $val = $mode;
 my $r = ((tlx_op_mode_id($val) == 4) or (tlx_op_mode_id($val) == 1) or (tlx_op_mode_id($val) == 2)) ? 255 : 0;
