@@ -19,7 +19,8 @@
 
 use FindBin;
 
-my $rklogger = "$FindBin::Bin/../src/bin/rklogger";
+#my $rklogger = "$FindBin::Bin/../src/bin/rklogger";
+my $rklogger = "rklogger";
 
 my @hardware_type_ids = ( 
     "", 
