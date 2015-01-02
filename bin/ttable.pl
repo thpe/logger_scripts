@@ -65,8 +65,8 @@ while (<>) {
     ++$start_year;
 }
 for (; $start_year <= $year; ++$start_year) {
-    print FILE $line;
-    $line = "\n";
+    print FILE $line."\n";
+    $line = "";
 }
 $csv->parse($line);
 @columns = $csv->fields();
